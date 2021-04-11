@@ -1,0 +1,6 @@
+[submodule "sopt_backend"]
+	path = sopt_backend
+	url = https://github.com/NJUPT-NYR/SOPT
+[submodule "sopt_frontend"]
+	path = sopt_frontend
+	url = https://github.com/NJUPT-NYR/sopt-frontend

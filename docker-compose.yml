@@ -1,0 +1,55 @@
+version: "3"
+
+networks:
+  sopt_net:
+
+services:
+  sopt_backend:
+    build:
+      dockerfile: ./backend.Dockerfile
+      context: .
+    networks:
+      - "sopt_net"
+    volumes:
+      - "./sopt_backend:/usr/src/app"
+    depends_on:
+      sopt_pg:
+        condition: service_healthy
+
+  sopt_frontend:
+    build:
+      dockerfile: ./frontend.Dockerfile
+      context: .
+    networks:
+      - "sopt_net"
+    volumes:
+      - "./sopt_frontend:/usr/src/app"
+
+  sopt_pg:
+    image: "postgres:12"
+    networks:
+      - "sopt_net"
+    environment:
+      - "POSTGRES_PASSWORD=password"
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_DB=sopt"
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sopt_nginx:
+    image: "nginx:1.19"
+    depends_on:
+      - "sopt_backend"
+      - "sopt_frontend"
+    networks:
+      - "sopt_net"
+    ports:
+      - "8080:80"
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
